@@ -8,7 +8,7 @@ st.set_page_config(page_title="🔮 恋愛占い　逆ピラミット型", page_
 def char_to_number(char):
     vowels = {
         'あ': 1, 'い': 2, 'う': 3, 'え': 4, 'お': 5, 'か': 1, 'き': 2, 'く': 3, 'け': 4, 'こ': 5,
-        'さ': 1, 'し': 2, 'す': 3, 'せ': 4, 'そ': 5, 'た': 1, 'ち': 2, 'つ': 3, 'て': 4, 'と': 5,
+        'さ': 1, 'し': 2, 'す': 3, 'せ': 4, 'そ': 5, 'た': 1, 'ち': 2, 'と': 3, 'て': 4, 'と': 5,
         'な': 1, 'に': 2, 'ぬ': 3, 'ね': 4, 'の': 5, 'は': 1, 'ひ': 2, 'ふ': 3, 'へ': 4, 'ほ': 5,
         'ま': 1, 'み': 2, 'む': 3, 'め': 4, 'も': 5, 'や': 1,         'ゆ': 3,        'よ': 5,
         'ら': 1, 'り': 2, 'る': 3, 'れ': 4, 'ろ': 5, 'わ': 1, 'ゐ': 2,         'ゑ': 4, 'を': 5,
@@ -99,8 +99,6 @@ else:
             else:
                 final_two, steps = reduce_to_final_two(combined)
                 
-                # 💡【ここを完全に修正しました！】
-                # 括弧を使わずに、リストから安全に2つの数字を取り出す新しい仕組み
                 num1 = final_two.pop(0)
                 num2 = final_two.pop(0)
                 score = int(f"{num1}{num2}")
@@ -131,16 +129,9 @@ else:
                 
                 st.warning("🔗 この結果を友達にシェアしよう！")
                 
-                # 💡 編集不可(disabled=True)にして保護
-                st.text_input("共有用URL（コピーしてお使いください）", value=full_share_url, disabled=True)
-                
-                # 💡 ワンタップでクリップボードに保存するコピーボタン
-                copy_button_html = f"""
-                <button onclick="navigator.clipboard.writeText('{full_share_url}').then(() => {{ alert('URLをコピーしました！LINEなどに貼り付けて送ってね！'); }})" 
-                        style="width: 100%; background-color: #4CAF50; color: white; padding: 12px; margin: 10px 0; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold;">
-                    📋 ワンタップでURLをコピーする
-                </button>
-                """
-                st.html(copy_button_html)
+                # 💡 Streamlit公式の1タップコピー機能を使用（右端に公式のコピーボタンが自動で付きます）
+                # 編集不可(disabled)ではなく読取専用(readonly)として綺麗に表示
+                st.code(full_share_url, language="text")
+                st.write("☝️ 上の枠の右側にある【四角いアイコン（コピーボタン）】をタップするとURLを1発コピーできます！")
         else:
             st.error("両方の名前を入力してください。")
