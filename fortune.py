@@ -8,7 +8,7 @@ st.set_page_config(page_title="🔮 恋愛占い　逆ピラミット型", page_
 def char_to_number(char):
     vowels = {
         'あ': 1, 'い': 2, 'う': 3, 'え': 4, 'お': 5, 'か': 1, 'き': 2, 'く': 3, 'け': 4, 'こ': 5,
-        'さ': 1, 'し': 2, 'す': 3, 'せ': 4, 'そ': 5, 'た': 1, 'ち': 2, 'つ': 3, 'て': 4, 'と': 5,
+        'さ': 1, 'し': 2, 'す': 3, 'せ': 4, 'そ': 5, 'た': 1, 'ち': 2, 'と': 3, 'て': 4, 'と': 5,
         'な': 1, 'に': 2, 'ぬ': 3, 'ね': 4, 'の': 5, 'は': 1, 'ひ': 2, 'ふ': 3, 'へ': 4, 'ほ': 5,
         'ま': 1, 'み': 2, 'む': 3, 'め': 4, 'も': 5, 'や': 1,         'ゆ': 3,        'よ': 5,
         'ら': 1, 'り': 2, 'る': 3, 'れ': 4, 'ろ': 5, 'わ': 1, 'ゐ': 2,         'ゑ': 4, 'を': 5,
@@ -98,7 +98,7 @@ else:
                 st.error("ひらがなで正しく名前を入力してください。")
             else:
                 final_two, steps = reduce_to_final_two(combined)
-                score = int(f"{final_two[0]}{final_two[1]}")
+                score = int(f"{final_two}{final_two}")
                 st.balloons()
                 
                 # 結果表示（中央寄せ）
@@ -119,14 +119,23 @@ else:
                 st.markdown(pyramid_html, unsafe_allow_html=True)
                 st.write("") 
                     
-                # 🚀 共有リンク機能を完璧に修正
+                # 🚀 正しい完全な共有リンクを作成
                 code = encode_result(name1, name2, score)
-                # あなたの公開URLとコードを完全にドッキングさせた本物のURLを作成
                 full_share_url = f"https://streamlit.app{code}"
                 
                 st.warning("🔗 この結果を友達にシェアしよう！")
-                st.write("下の入力欄の文字をぜんぶコピーして友達に送ってね：")
-                # コピーしやすいようにテキスト入力欄に本物のURLを丸ごと表示
-                st.text_input("コピー用URL", value=full_share_url, label_visibility="collapsed")
+                
+                # 💡 編集不可(disabled=True)にしてユーザーが中身をいじれないように保護
+                st.text_input("共有用URL（コピーしてお使いください）", value=full_share_url, disabled=True)
+                
+                # 💡 ワンタップでクリップボードに保存するコピーボタンを追加！
+                # ※ st.html 内の JavaScript を使い、ボタンを押した瞬間にコピーさせます
+                copy_button_html = f"""
+                <button onclick="navigator.clipboard.writeText('{full_share_url}').then(() => {{ alert('URLをコピーしました！LINEなどに貼り付けて送ってね！'); }})" 
+                        style="width: 100%; background-color: #4CAF50; color: white; padding: 12px; margin: 10px 0; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold;">
+                    📋 ワンタップでURLをコピーする
+                </button>
+                """
+                st.html(copy_button_html)
         else:
             st.error("両方の名前を入力してください。")
