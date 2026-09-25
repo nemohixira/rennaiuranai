@@ -2,7 +2,7 @@ import streamlit as st
 import base64
 
 # ページの設定
-st.set_page_config(page_title="🔮 恋愛逆ピラミッド占い", page_icon="🔮", layout="centered")
+st.set_page_config(page_title="🔮 恋愛占い　逆ピラミット型", page_icon="🔮", layout="centered")
 
 # --- 🔮 占いロジック ---
 def char_to_number(char):
@@ -55,7 +55,7 @@ def decode_result(code):
         return None
 
 # --- 🖥️ 画面表示の制御 ---
-st.title("🔮 恋愛逆ピラミッド占い App")
+st.title("🔮 恋愛占い　逆ピラミット型")
 st.caption("名前を数字に変えて、2人の相性をピラミッドで占います。")
 
 # URLパラメータの読み込み
@@ -68,13 +68,13 @@ if share_code:
         name1, name2, score = decoded
         st.success("💌 共有された占い結果が届いています！")
         
-        # 綺麗に中央寄せするスタイル
+        # 綺麗に中央寄せするスタイル (unsafe_allow_html=True に修正)
         st.markdown(f"""
             <div style="text-align: center; margin: 20px 0;">
                 <h2 style="color: #FF4B4B;">💖 {name1} × {name2}</h2>
                 <h3 style="font-size: 28px;">ふたりの相性は... 🎉 <span style="font-size: 40px; font-weight: bold; color: #FF4B4B;">{score}%</span> 🎉</h3>
             </div>
-        """, unsafe_allow_code=True)
+        """, unsafe_allow_html=True)
         
         # 再度占うボタン
         if st.button("自分も新しく占う 🎯", use_container_width=True):
@@ -94,46 +94,35 @@ else:
             n2 = name_to_number_list(name2)
             combined = interleave_lists(n1, n2)
             final_two, steps = reduce_to_final_two(combined)
-            score = int(f"{final_two[0]}{final_two[1]}")
+            score = int(f"{final_two}{final_two}")
             
             st.balloons()
             
-            # 結果表示（中央寄せ）
+            # 結果表示（中央寄せ）(unsafe_allow_html=True に修正)
             st.markdown(f"""
                 <div style="text-align: center; margin: 20px 0;">
                     <h2 style="font-size: 32px; color: #FF4B4B;">🎉 相性結果: {score}% 🎉</h2>
                 </div>
-            """, unsafe_allow_code=True)
+            """, unsafe_allow_html=True)
             
             st.write("### 📐 相性ピラミッド")
             
             # 💡 HTMLとCSSを使って、隙間を詰めつつ完全に真ん中寄せにする魔法
-            pyramid_html = '<div style="text-align: center; font-family: monospace; line-height: 1.2; letter-spacing: 4px; font-size: 20px; background-color: #1e1e1e; padding: 20px; border-radius: 10px; color: #fff;">'
+            pyramid_html = '<div style="text-align: center; font-family: monospace; line-height: 1.5; letter-spacing: 6px; font-size: 22px; background-color: #1e1e1e; padding: 25px; border-radius: 10px; color: #fff; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">'
             for row in steps:
                 line = ' '.join(str(n) for n in row)
-                pyramid_html += f'<div>{line}</div>'
+                pyramid_html += f'<div style="margin: 4px 0;">{line}</div>'
             pyramid_html += '</div>'
             
-            st.markdown(pyramid_html, unsafe_allow_code=True)
+            st.markdown(pyramid_html, unsafe_allow_html=True)
             st.write("") # スペース空け
                 
-            # 🚀 自動で現在のアプリの公開URLを取得する仕組み
-            # これにより localhost でも本番環境でも、動的に正しいURLになります
-            try:
-                # ブラウザ上の本物のURLを取得して共有リンクを作成
-                current_url = st.to_notebook_url() if hasattr(st, "to_notebook_url") else "https://streamlit.io"
-                # Streamlit Cloud環境用の安全なフォールバック
-                from streamlit.web.server.server import Server
-                # 実際の稼働URLを推測（開けないリスクをゼロに）
-                code = encode_result(name1, name2, score)
-                share_url = f"?share={code}"
-                
-                st.warning("🔗 この結果を友達にシェアしよう！")
-                st.write("このページのURLの後ろに、下の文字をそのままくっつけて送っても反応するよ！")
-                st.code(share_url, language="")
-            except:
-                code = encode_result(name1, name2, score)
-                st.warning("🔗 共有用コード")
-                st.text_input("コードをコピー：", value=f"?share={code}")
+            # 🚀 共有リンク機能
+            code = encode_result(name1, name2, score)
+            share_url = f"?share={code}"
+            
+            st.warning("🔗 この結果を友達にシェアしよう！")
+            st.write("このページのURLの最後に、下の文字をそのままくっつけてLINEなどで送ってね！")
+            st.code(share_url, language="")
         else:
             st.error("両方の名前を入力してください。")
