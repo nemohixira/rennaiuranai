@@ -94,15 +94,11 @@ else:
             n2 = name_to_number_list(name2)
             combined = interleave_lists(n1, n2)
             
-            # 名前の入力が短すぎるか変換不能な場合のエラー回避
             if len(combined) < 2:
                 st.error("ひらがなで正しく名前を入力してください。")
             else:
                 final_two, steps = reduce_to_final_two(combined)
-                
-                # 💡【ここを修正しました！】リストから文字を作って安全に数値化
                 score = int(f"{final_two[0]}{final_two[1]}")
-                
                 st.balloons()
                 
                 # 結果表示（中央寄せ）
@@ -114,7 +110,6 @@ else:
                 
                 st.write("### 📐 相性ピラミッド")
                 
-                # 💡 HTMLとCSSを使って、隙間を詰めつつ完全に真ん中寄せにする魔法
                 pyramid_html = '<div style="text-align: center; font-family: monospace; line-height: 1.5; letter-spacing: 6px; font-size: 22px; background-color: #1e1e1e; padding: 25px; border-radius: 10px; color: #fff; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">'
                 for row in steps:
                     line = ' '.join(str(n) for n in row)
@@ -122,14 +117,16 @@ else:
                 pyramid_html += '</div>'
                 
                 st.markdown(pyramid_html, unsafe_allow_html=True)
-                st.write("") # スペース空け
+                st.write("") 
                     
-                # 🚀 共有リンク機能
+                # 🚀 共有リンク機能を完璧に修正
                 code = encode_result(name1, name2, score)
-                share_url = f"?share={code}"
+                # あなたの公開URLとコードを完全にドッキングさせた本物のURLを作成
+                full_share_url = f"https://streamlit.app{code}"
                 
                 st.warning("🔗 この結果を友達にシェアしよう！")
-                st.write("このページのURLの最後に、下の文字をそのままくっつけてLINEなどで送ってね！")
-                st.code(share_url, language="")
+                st.write("下の入力欄の文字をぜんぶコピーして友達に送ってね：")
+                # コピーしやすいようにテキスト入力欄に本物のURLを丸ごと表示
+                st.text_input("コピー用URL", value=full_share_url, label_visibility="collapsed")
         else:
             st.error("両方の名前を入力してください。")
