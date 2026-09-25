@@ -68,7 +68,7 @@ if share_code:
         name1, name2, score = decoded
         st.success("💌 共有された占い結果が届いています！")
         
-        # 綺麗に中央寄せするスタイル (unsafe_allow_html=True に修正)
+        # 綺麗に中央寄せするスタイル
         st.markdown(f"""
             <div style="text-align: center; margin: 20px 0;">
                 <h2 style="color: #FF4B4B;">💖 {name1} × {name2}</h2>
@@ -93,36 +93,43 @@ else:
             n1 = name_to_number_list(name1)
             n2 = name_to_number_list(name2)
             combined = interleave_lists(n1, n2)
-            final_two, steps = reduce_to_final_two(combined)
-            score = int(f"{final_two}{final_two}")
             
-            st.balloons()
-            
-            # 結果表示（中央寄せ）(unsafe_allow_html=True に修正)
-            st.markdown(f"""
-                <div style="text-align: center; margin: 20px 0;">
-                    <h2 style="font-size: 32px; color: #FF4B4B;">🎉 相性結果: {score}% 🎉</h2>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            st.write("### 📐 相性ピラミッド")
-            
-            # 💡 HTMLとCSSを使って、隙間を詰めつつ完全に真ん中寄せにする魔法
-            pyramid_html = '<div style="text-align: center; font-family: monospace; line-height: 1.5; letter-spacing: 6px; font-size: 22px; background-color: #1e1e1e; padding: 25px; border-radius: 10px; color: #fff; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">'
-            for row in steps:
-                line = ' '.join(str(n) for n in row)
-                pyramid_html += f'<div style="margin: 4px 0;">{line}</div>'
-            pyramid_html += '</div>'
-            
-            st.markdown(pyramid_html, unsafe_allow_html=True)
-            st.write("") # スペース空け
+            # 名前の入力が短すぎるか変換不能な場合のエラー回避
+            if len(combined) < 2:
+                st.error("ひらがなで正しく名前を入力してください。")
+            else:
+                final_two, steps = reduce_to_final_two(combined)
                 
-            # 🚀 共有リンク機能
-            code = encode_result(name1, name2, score)
-            share_url = f"?share={code}"
-            
-            st.warning("🔗 この結果を友達にシェアしよう！")
-            st.write("このページのURLの最後に、下の文字をそのままくっつけてLINEなどで送ってね！")
-            st.code(share_url, language="")
+                # 💡【ここを修正しました！】リストから文字を作って安全に数値化
+                score = int(f"{final_two[0]}{final_two[1]}")
+                
+                st.balloons()
+                
+                # 結果表示（中央寄せ）
+                st.markdown(f"""
+                    <div style="text-align: center; margin: 20px 0;">
+                        <h2 style="font-size: 32px; color: #FF4B4B;">🎉 相性結果: {score}% 🎉</h2>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                st.write("### 📐 相性ピラミッド")
+                
+                # 💡 HTMLとCSSを使って、隙間を詰めつつ完全に真ん中寄せにする魔法
+                pyramid_html = '<div style="text-align: center; font-family: monospace; line-height: 1.5; letter-spacing: 6px; font-size: 22px; background-color: #1e1e1e; padding: 25px; border-radius: 10px; color: #fff; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">'
+                for row in steps:
+                    line = ' '.join(str(n) for n in row)
+                    pyramid_html += f'<div style="margin: 4px 0;">{line}</div>'
+                pyramid_html += '</div>'
+                
+                st.markdown(pyramid_html, unsafe_allow_html=True)
+                st.write("") # スペース空け
+                    
+                # 🚀 共有リンク機能
+                code = encode_result(name1, name2, score)
+                share_url = f"?share={code}"
+                
+                st.warning("🔗 この結果を友達にシェアしよう！")
+                st.write("このページのURLの最後に、下の文字をそのままくっつけてLINEなどで送ってね！")
+                st.code(share_url, language="")
         else:
             st.error("両方の名前を入力してください。")
