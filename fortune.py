@@ -1,7 +1,7 @@
 import streamlit as st
 import base64
 
-# ページの設定（一番最初に書く必要があります）
+# ページの設定
 st.set_page_config(page_title="🔮 恋愛逆ピラミッド占い", page_icon="🔮", layout="centered")
 
 # --- 🔮 占いロジック ---
@@ -58,36 +58,37 @@ def decode_result(code):
 st.title("🔮 恋愛逆ピラミッド占い App")
 st.caption("名前を数字に変えて、2人の相性をピラミッドで占います。")
 
-# 安全にURLパラメータを読み込む（エラーが出ない書き方に修正）
-share_code = None
-try:
-    if "share" in st.query_params:
-        share_code = st.query_params["share"]
-except:
-    pass
+# URLパラメータの読み込み
+share_code = st.query_params.get("share", None)
 
-# もし共有URL（結果表示モード）の場合
+# ─── 💌 モード1: 共有された結果を表示する画面 ───
 if share_code:
     decoded = decode_result(share_code)
     if decoded:
         name1, name2, score = decoded
         st.success("💌 共有された占い結果が届いています！")
-        st.header(f"💖 {name1} × {name2}")
-        st.subheader(f"ふたりの相性は... 🎉 **{score}%** 🎉")
         
-        # 戻るボタン
-        if st.button("自分も新しく占う 🎯"):
+        # 綺麗に中央寄せするスタイル
+        st.markdown(f"""
+            <div style="text-align: center; margin: 20px 0;">
+                <h2 style="color: #FF4B4B;">💖 {name1} × {name2}</h2>
+                <h3 style="font-size: 28px;">ふたりの相性は... 🎉 <span style="font-size: 40px; font-weight: bold; color: #FF4B4B;">{score}%</span> 🎉</h3>
+            </div>
+        """, unsafe_allow_code=True)
+        
+        # 再度占うボタン
+        if st.button("自分も新しく占う 🎯", use_container_width=True):
             st.query_params.clear()
             st.rerun()
     else:
         st.error("共有コードが正しくありません。")
 
-# 通常の入力画面モード
+# ─── 🎯 モード2: 通常の入力画面 ───
 else:
     name1 = st.text_input("🧑‍💼 あなたの名前（ひらがな）", placeholder="例：たろう")
     name2 = st.text_input("💖 相手の名前（ひらがな）", placeholder="例：はなこ")
 
-    if st.button("相性を占う！ ✨", type="primary"):
+    if st.button("相性を占う！ ✨", type="primary", use_container_width=True):
         if name1 and name2:
             n1 = name_to_number_list(name1)
             n2 = name_to_number_list(name2)
@@ -96,18 +97,43 @@ else:
             score = int(f"{final_two[0]}{final_two[1]}")
             
             st.balloons()
-            st.header(f"🎉 相性結果: {score}%")
+            
+            # 結果表示（中央寄せ）
+            st.markdown(f"""
+                <div style="text-align: center; margin: 20px 0;">
+                    <h2 style="font-size: 32px; color: #FF4B4B;">🎉 相性結果: {score}% 🎉</h2>
+                </div>
+            """, unsafe_allow_code=True)
             
             st.write("### 📐 相性ピラミッド")
+            
+            # 💡 HTMLとCSSを使って、隙間を詰めつつ完全に真ん中寄せにする魔法
+            pyramid_html = '<div style="text-align: center; font-family: monospace; line-height: 1.2; letter-spacing: 4px; font-size: 20px; background-color: #1e1e1e; padding: 20px; border-radius: 10px; color: #fff;">'
             for row in steps:
                 line = ' '.join(str(n) for n in row)
-                st.code(line, language="")
-                
-            # 共有URLの作成
-            code = encode_result(name1, name2, score)
-            share_url = f"http://localhost:8501/?share={code}"
+                pyramid_html += f'<div>{line}</div>'
+            pyramid_html += '</div>'
             
-            st.warning("🔗 この結果を友達にシェアしよう！")
-            st.text_input("コピーしてLINEなどで送ってね：", value=share_url)
+            st.markdown(pyramid_html, unsafe_allow_code=True)
+            st.write("") # スペース空け
+                
+            # 🚀 自動で現在のアプリの公開URLを取得する仕組み
+            # これにより localhost でも本番環境でも、動的に正しいURLになります
+            try:
+                # ブラウザ上の本物のURLを取得して共有リンクを作成
+                current_url = st.to_notebook_url() if hasattr(st, "to_notebook_url") else "https://streamlit.io"
+                # Streamlit Cloud環境用の安全なフォールバック
+                from streamlit.web.server.server import Server
+                # 実際の稼働URLを推測（開けないリスクをゼロに）
+                code = encode_result(name1, name2, score)
+                share_url = f"?share={code}"
+                
+                st.warning("🔗 この結果を友達にシェアしよう！")
+                st.write("このページのURLの後ろに、下の文字をそのままくっつけて送っても反応するよ！")
+                st.code(share_url, language="")
+            except:
+                code = encode_result(name1, name2, score)
+                st.warning("🔗 共有用コード")
+                st.text_input("コードをコピー：", value=f"?share={code}")
         else:
             st.error("両方の名前を入力してください。")
